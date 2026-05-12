@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Travel Budget Tracker — TechWithKeshav</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg-page:#f0f4f8;--bg-card:#ffffff;--bg-card2:#f8fafc;
+      --primary:#7c3aed;--primary-light:#ede9fe;--primary-dark:#5b21b6;
+      --blue:#2563eb;--blue-light:#dbeafe;
+      --green:#059669;--green-light:#d1fae5;
+      --red:#dc2626;--red-light:#fee2e2;
+      --amber:#d97706;--amber-light:#fef3c7;
+      --text-dark:#1a1a2e;--text-body:#374151;--text-muted:#6b7280;--text-light:#9ca3af;
+      --border:#e5e7eb;
+      --shadow:0 4px 24px rgba(0,0,0,0.08);
+      --shadow-hover:0 8px 32px rgba(124,58,237,0.15);
+      --space-xs:4px;--space-sm:8px;--space-md:16px;--space-lg:24px;--space-xl:32px;--space-2xl:48px;
+      --radius-sm:8px;--radius-md:12px;--radius-lg:16px;--radius-full:100px;
+    }
+    *{margin:0;padding:0;box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{font-family:'Space Grotesk',sans-serif;background:var(--bg-page);color:var(--text-body);line-height:1.6;min-height:100vh}
+    .page-wrapper{max-width:680px;margin:0 auto;padding:var(--space-lg);display:flex;flex-direction:column;gap:var(--space-lg)}
+    .card{background:var(--bg-card);border-radius:var(--radius-lg);border:1px solid var(--border);padding:var(--space-xl);box-shadow:var(--shadow);transition:all 0.3s ease}
+    .card:hover{transform:translateY(-2px);box-shadow:var(--shadow-hover)}
+    .header{text-align:center;padding:var(--space-xl) 0 var(--space-md)}
+    .app-title{font-family:'Inter',sans-serif;font-size:2rem;font-weight:900;color:var(--text-dark);letter-spacing:-1px;margin-bottom:var(--space-sm)}
+    .app-subtitle{color:var(--text-muted);font-size:0.9rem}
+    .card-title{font-family:'Inter',sans-serif;font-size:1.1rem;font-weight:800;color:var(--text-dark);margin-bottom:var(--space-lg);padding-bottom:var(--space-md);border-bottom:1px solid var(--border)}
+    .card-desc{color:var(--text-muted);font-size:0.82rem;margin-top:-12px;margin-bottom:var(--space-lg)}
+    .form-group{display:flex;flex-direction:column;gap:var(--space-xs);margin-bottom:var(--space-md)}
+    label{font-size:0.78rem;font-weight:600;color:var(--text-body);letter-spacing:0.3px}
+    input,select{width:100%;padding:10px var(--space-md);border:1.5px solid var(--border);border-radius:var(--radius-sm);font-family:'Space Grotesk',sans-serif;font-size:0.88rem;color:var(--text-dark);background:var(--bg-card);outline:none;transition:border-color 0.2s,box-shadow 0.2s}
+    input:focus,select:focus{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-light)}
+    input::placeholder{color:var(--text-light)}
+    select{cursor:pointer}
+    .btn-primary{width:100%;padding:12px var(--space-lg);background:var(--primary);color:#fff;border:none;border-radius:var(--radius-sm);font-family:'Space Grotesk',sans-serif;font-size:0.9rem;font-weight:700;cursor:pointer;transition:all 0.2s;margin-top:var(--space-sm)}
+    .btn-primary:hover{background:var(--primary-dark);transform:translateY(-1px);box-shadow:0 4px 12px rgba(124,58,237,0.35)}
+    .btn-primary:active{transform:translateY(0);box-shadow:none}
+    .btn-danger{padding:8px var(--space-md);background:var(--red-light);color:var(--red);border:1px solid var(--red);border-radius:var(--radius-sm);font-family:'Space Grotesk',sans-serif;font-size:0.78rem;font-weight:700;cursor:pointer;transition:all 0.2s}
+    .btn-danger:hover{background:var(--red);color:#fff}
+    .trip-name-display{font-size:0.88rem;color:var(--text-muted);margin-bottom:var(--space-lg)}
+    .highlight-text{font-weight:700;color:var(--primary);font-size:1rem}
+    .summary-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--space-md);margin-bottom:var(--space-lg)}
+    .summary-item{background:var(--bg-card2);border:1px solid var(--border);border-radius:var(--radius-md);padding:var(--space-md);text-align:center;position:relative;overflow:hidden}
+    .summary-item::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--primary)}
+    .summary-item.spent::before{background:var(--red)}
+    .summary-item.remaining::before{background:var(--green)}
+    .summary-label{display:block;font-size:0.68rem;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-muted);margin-bottom:var(--space-xs)}
+    .summary-value{display:block;font-family:'Inter',sans-serif;font-size:1.4rem;font-weight:900;color:var(--text-dark)}
+    .summary-item.spent .summary-value{color:var(--red)}
+    .summary-item.remaining .summary-value{color:var(--green)}
+    .progress-container{margin-top:var(--space-md)}
+    .progress-bar-wrap{height:10px;background:var(--bg-card2);border-radius:var(--radius-full);overflow:hidden;border:1px solid var(--border);margin-bottom:var(--space-sm)}
+    .progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--primary),var(--blue));border-radius:var(--radius-full);transition:width 0.5s ease}
+    .progress-bar-fill.danger{background:linear-gradient(90deg,var(--amber),var(--red))}
+    .progress-label{font-size:0.75rem;color:var(--text-muted);font-weight:500}
+    .expense-form-row{display:grid;grid-template-columns:2fr 1fr 1fr;gap:var(--space-md);align-items:end}
+    .expense-form-row .form-group{margin-bottom:0}
+    .expense-list-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:0}
+    .expense-list-header .card-title{margin-bottom:0;border-bottom:none;padding-bottom:0}
+    .filter-row{display:flex;flex-wrap:wrap;gap:var(--space-xs);margin:var(--space-md) 0;padding-bottom:var(--space-md);border-bottom:1px solid var(--border);align-items:center}
+    .filter-label{font-size:0.72rem;color:var(--text-muted);font-weight:600;margin-right:var(--space-xs)}
+    .filter-btn{padding:5px 12px;background:var(--bg-card2);border:1px solid var(--border);border-radius:var(--radius-full);font-family:'Space Grotesk',sans-serif;font-size:0.72rem;font-weight:600;color:var(--text-muted);cursor:pointer;transition:all 0.2s}
+    .filter-btn:hover{border-color:var(--primary);color:var(--primary);background:var(--primary-light)}
+    .filter-btn.active{background:var(--primary);border-color:var(--primary);color:#fff}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+    .expense-item{display:flex;justify-content:space-between;align-items:center;padding:var(--space-md);background:var(--bg-card2);border:1px solid var(--border);border-radius:var(--radius-md);margin-bottom:var(--space-sm);transition:all 0.2s;animation:fadeIn 0.3s ease}
+    .expense-item:hover{border-color:var(--primary);background:var(--primary-light)}
+    .expense-item-left{display:flex;align-items:center;gap:var(--space-md)}
+    .expense-item-right{display:flex;align-items:center;gap:var(--space-md)}
+    .expense-category-icon{width:38px;height:38px;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0}
+    .cat-food{background:#fef3c7}.cat-transport{background:#dbeafe}.cat-hotel{background:#d1fae5}.cat-activities{background:#ede9fe}.cat-shopping{background:#fce7f3}.cat-other{background:#f3f4f6}
+    .expense-name{font-size:0.88rem;font-weight:600;color:var(--text-dark)}
+    .expense-category-label{font-size:0.7rem;color:var(--text-muted);margin-top:1px}
+    .expense-amount{font-family:'Inter',sans-serif;font-size:1rem;font-weight:800;color:var(--red)}
+    .delete-btn{width:28px;height:28px;border-radius:50%;background:var(--red-light);border:none;color:var(--red);font-size:0.8rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;flex-shrink:0}
+    .delete-btn:hover{background:var(--red);color:#fff;transform:scale(1.1)}
+    .empty-state{text-align:center;color:var(--text-muted);font-size:0.85rem;padding:var(--space-2xl) 0}
+    .converter-row{display:grid;grid-template-columns:2fr auto 1fr 1fr;gap:var(--space-md);align-items:end;margin-bottom:var(--space-md)}
+    .converter-arrow{font-size:1.4rem;color:var(--primary);padding-bottom:10px;font-weight:700}
+    .converter-row .form-group{margin-bottom:0}
+    .conversion-result{margin-top:var(--space-lg);padding:var(--space-lg);background:linear-gradient(135deg,var(--primary-light),var(--blue-light));border-radius:var(--radius-md);border:1px solid rgba(124,58,237,0.2);text-align:center;animation:fadeIn 0.4s ease}
+    #conversion-output{display:block;font-family:'Inter',sans-serif;font-size:1.5rem;font-weight:900;color:var(--primary);margin-bottom:var(--space-xs)}
+    .rate-note{font-size:0.72rem;color:var(--text-muted)}
+    .trips-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--space-lg)}
+    .trips-header h2{font-family:'Inter',sans-serif;font-size:1.1rem;font-weight:800;color:var(--text-dark)}
+    .trip-item{background:var(--bg-card2);border:1px solid var(--border);border-radius:var(--radius-md);padding:var(--space-md) var(--space-lg);margin-bottom:var(--space-sm);display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:all 0.2s;animation:fadeIn 0.3s ease}
+    .trip-item:hover{border-color:var(--primary);background:var(--primary-light);transform:translateX(4px)}
+    .trip-item.active-trip{border-color:var(--primary);background:var(--primary-light)}
+    .trip-item-left{display:flex;align-items:center;gap:12px}
+    .trip-emoji{width:38px;height:38px;background:#fff;border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-size:1.2rem;border:1px solid var(--border)}
+    .trip-dest{font-size:0.88rem;font-weight:700;color:var(--text-dark)}
+    .trip-meta{font-size:0.72rem;color:var(--text-muted);margin-top:2px}
+    .trip-budget-badge{font-size:0.78rem;font-weight:700;color:var(--primary);background:var(--primary-light);border:1px solid rgba(124,58,237,0.2);border-radius:var(--radius-full);padding:4px 12px}
+    .btn-new-trip{padding:8px 16px;background:var(--primary);color:#fff;border:none;border-radius:var(--radius-sm);font-family:'Space Grotesk',sans-serif;font-size:0.78rem;font-weight:700;cursor:pointer;transition:all 0.2s}
+    .btn-new-trip:hover{background:var(--primary-dark)}
+    .delete-trip-btn{background:var(--red-light);border:1px solid var(--red);color:var(--red);border-radius:6px;width:28px;height:28px;cursor:pointer;font-size:0.85rem;display:flex;align-items:center;justify-content:center;transition:all 0.2s;flex-shrink:0}
+    .delete-trip-btn:hover{background:var(--red);color:#fff;transform:scale(1.1)}
+    .spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.7s linear infinite;vertical-align:middle;margin-right:6px}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    @media(max-width:600px){
+      .page-wrapper{padding:var(--space-md)}
+      .app-title{font-size:1.5rem}
+      .summary-grid{grid-template-columns:1fr}
+      .expense-form-row{grid-template-columns:1fr}
+      .converter-row{grid-template-columns:1fr 1fr}
+      .converter-arrow{display:none}
+    }
+  </style>
+</head>
+<body>
+  <div class="page-wrapper">
+
+    <div class="header">
+      <h1 class="app-title">✈️ Travel Budget Tracker</h1>
+      <p class="app-subtitle">Plan your trip. Track your spending. Never run out of money abroad.</p>
+    </div>
+
+    <div class="card">
+      <div class="trips-header">
+        <h2>🗺️ My Trips</h2>
+        <button class="btn-new-trip" onclick="showNewTripForm()">+ New Trip</button>
+      </div>
+      <div id="trips-container">
+        <p class="empty-state" id="trips-empty">No trips yet. Create your first trip below! 👇</p>
+      </div>
+    </div>
+
+    <div class="card" id="trip-setup-card">
+      <h2 class="card-title">🗺️ Create New Trip</h2>
+      <div class="form-group">
+        <label for="destination">Destination City</label>
+        <input type="text" id="destination" placeholder="e.g. Paris, Tokyo, New York"/>
+      </div>
+      <div class="form-group">
+        <label for="total-budget">Total Budget</label>
+        <input type="number" id="total-budget" placeholder="e.g. 2000" min="1"/>
+      </div>
+      <div class="form-group">
+        <label for="currency">Currency</label>
+        <select id="currency">
+          <option value="EUR">🇪🇺 EUR — Euro</option>
+          <option value="USD">🇺🇸 USD — US Dollar</option>
+          <option value="GBP">🇬🇧 GBP — British Pound</option>
+          <option value="INR">🇮🇳 INR — Indian Rupee</option>
+          <option value="JPY">🇯🇵 JPY — Japanese Yen</option>
+          <option value="AUD">🇦🇺 AUD — Australian Dollar</option>
+          <option value="CAD">🇨🇦 CAD — Canadian Dollar</option>
+          <option value="CHF">🇨🇭 CHF — Swiss Franc</option>
+          <option value="SGD">🇸🇬 SGD — Singapore Dollar</option>
+          <option value="AED">🇦🇪 AED — UAE Dirham</option>
+        </select>
+      </div>
+      <button id="start-trip-btn" class="btn-primary" onclick="saveTrip()">Save Trip 🚀</button>
+    </div>
+
+    <div class="card" id="summary-section" style="display:none;">
+      <h2 class="card-title">📊 Budget Summary</h2>
+      <div class="trip-name-display">
+        Trip to: <span id="display-destination" class="highlight-text">—</span>
+      </div>
+      <div class="summary-grid">
+        <div class="summary-item">
+          <span class="summary-label">Total Budget</span>
+          <span class="summary-value" id="display-budget">€0</span>
+        </div>
+        <div class="summary-item spent">
+          <span class="summary-label">Spent</span>
+          <span class="summary-value" id="display-spent">€0</span>
+        </div>
+        <div class="summary-item remaining">
+          <span class="summary-label">Remaining</span>
+          <span class="summary-value" id="display-remaining">€0</span>
+        </div>
+      </div>
+      <div class="progress-container">
+        <div class="progress-bar-wrap">
+          <div class="progress-bar-fill" id="progress-bar" style="width:0%"></div>
+        </div>
+        <span class="progress-label" id="progress-label">0% of budget used</span>
+      </div>
+    </div>
+
+    <div class="card" id="expense-section" style="display:none;">
+      <h2 class="card-title">➕ Add Expense</h2>
+      <div class="expense-form-row">
+        <div class="form-group">
+          <label for="expense-name">What did you spend on?</label>
+          <input type="text" id="expense-name" placeholder="e.g. Lunch at cafe"/>
+        </div>
+        <div class="form-group">
+          <label for="expense-amount">Amount</label>
+          <input type="number" id="expense-amount" placeholder="e.g. 25" min="0"/>
+        </div>
+        <div class="form-group">
+          <label for="expense-category">Category</label>
+          <select id="expense-category">
+            <option value="food">🍔 Food</option>
+            <option value="transport">🚗 Transport</option>
+            <option value="hotel">🏨 Hotel</option>
+            <option value="activities">🎭 Activities</option>
+            <option value="shopping">🛍️ Shopping</option>
+            <option value="other">📦 Other</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn-primary" onclick="addExpense()">Add Expense ➕</button>
+    </div>
+
+    <div class="card" id="expense-list-section" style="display:none;">
+      <div class="expense-list-header">
+        <h2 class="card-title">🧾 My Expenses</h2>
+        <button class="btn-danger" onclick="clearAll()">Clear All</button>
+      </div>
+      <div class="filter-row">
+        <span class="filter-label">Filter by:</span>
+        <button class="filter-btn active" data-filter="all">All</button>
+        <button class="filter-btn" data-filter="food">🍔 Food</button>
+        <button class="filter-btn" data-filter="transport">🚗 Transport</button>
+        <button class="filter-btn" data-filter="hotel">🏨 Hotel</button>
+        <button class="filter-btn" data-filter="activities">🎭 Activities</button>
+        <button class="filter-btn" data-filter="shopping">🛍️ Shopping</button>
+        <button class="filter-btn" data-filter="other">📦 Other</button>
+      </div>
+      <div id="expense-items-container">
+        <p class="empty-state" id="empty-message">No expenses yet. Start adding above! 👆</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 class="card-title">💱 Quick Currency Converter</h2>
+      <p class="card-desc">Convert any amount between currencies using live exchange rates.</p>
+      <div class="converter-row">
+        <div class="form-group">
+          <label for="convert-amount">Amount</label>
+          <input type="number" id="convert-amount" placeholder="e.g. 100" min="0"/>
+        </div>
+        <div class="form-group">
+          <label for="from-currency">From</label>
+          <select id="from-currency">
+            <option value="EUR">🇪🇺 EUR</option><option value="USD">🇺🇸 USD</option>
+            <option value="GBP">🇬🇧 GBP</option><option value="INR">🇮🇳 INR</option>
+            <option value="JPY">🇯🇵 JPY</option><option value="AUD">🇦🇺 AUD</option>
+            <option value="CAD">🇨🇦 CAD</option><option value="CHF">🇨🇭 CHF</option>
+            <option value="SGD">🇸🇬 SGD</option><option value="AED">🇦🇪 AED</option>
+          </select>
+        </div>
+        <div class="converter-arrow">→</div>
+        <div class="form-group">
+          <label for="to-currency">To</label>
+          <select id="to-currency">
+            <option value="USD">🇺🇸 USD</option><option value="EUR">🇪🇺 EUR</option>
+            <option value="GBP">🇬🇧 GBP</option><option value="INR">🇮🇳 INR</option>
+            <option value="JPY">🇯🇵 JPY</option><option value="AUD">🇦🇺 AUD</option>
+            <option value="CAD">🇨🇦 CAD</option><option value="CHF">🇨🇭 CHF</option>
+            <option value="SGD">🇸🇬 SGD</option><option value="AED">🇦🇪 AED</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn-primary" onclick="convertCurrency()">Convert 💱</button>
+      <div class="conversion-result" id="conversion-result" style="display:none;">
+        <span id="conversion-output"></span>
+        <span class="rate-note" id="rate-note">Live rate</span>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const SYMBOLS = { EUR:'€',USD:'$',GBP:'£',INR:'₹',JPY:'¥',AUD:'A$',CAD:'C$',CHF:'Fr',SGD:'S$',AED:'د.إ' }
+    const ICONS   = { food:'🍔',transport:'🚗',hotel:'🏨',activities:'🎭',shopping:'🛍️',other:'📦' }
+    const LABELS  = { food:'Food & Drinks',transport:'Transport',hotel:'Hotel / Stay',activities:'Activities',shopping:'Shopping',other:'Other' }
+
+    let state = { trips:[], activeFilter:'all' }
+    let currentTrip = null
+
+    function save() { localStorage.setItem('tbt_v2', JSON.stringify(state)) }
+    function load() {
+      const d = localStorage.getItem('tbt_v2')
+      if (d) state = JSON.parse(d)
+      renderTrips()
+    }
+
+    function renderTrips() {
+      document.getElementById('trips-empty').style.display = state.trips.length === 0 ? 'block' : 'none'
+      document.querySelectorAll('.trip-item').forEach(e => e.remove())
+      state.trips.forEach(trip => {
+        const item = document.createElement('div')
+        item.className = 'trip-item' + (currentTrip?.id === trip.id ? ' active-trip' : '')
+        item.innerHTML = `
+          <div class="trip-item-left">
+            <div class="trip-emoji">✈️</div>
+            <div>
+              <div class="trip-dest">${trip.destination}</div>
+              <div class="trip-meta">${trip.currency} · ${trip.date}</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <div class="trip-budget-badge">${SYMBOLS[trip.currency]}${fmt(trip.budget)}</div>
+            <button class="delete-trip-btn" title="Delete trip">🗑️</button>
+          </div>
+        `
+        item.querySelector('.delete-trip-btn').addEventListener('click', (e) => {
+          e.stopPropagation()
+          deleteTrip(trip.id)
+        })
+        item.addEventListener('click', () => selectTrip(trip, item))
+        document.getElementById('trips-container').appendChild(item)
+      })
+    }
+
+    function selectTrip(trip, el) {
+      currentTrip = trip
+      document.querySelectorAll('.trip-item').forEach(i => i.classList.remove('active-trip'))
+      el.classList.add('active-trip')
+      document.getElementById('summary-section').style.display      = 'block'
+      document.getElementById('expense-section').style.display      = 'block'
+      document.getElementById('expense-list-section').style.display = 'block'
+      document.getElementById('display-destination').textContent    = trip.destination
+      document.getElementById('display-budget').textContent         = SYMBOLS[trip.currency] + fmt(trip.budget)
+      renderExpenses()
+      updateSummary()
+      document.getElementById('summary-section').scrollIntoView({ behavior:'smooth', block:'start' })
+    }
+
+    function showNewTripForm() {
+      currentTrip = null
+      document.getElementById('summary-section').style.display      = 'none'
+      document.getElementById('expense-section').style.display      = 'none'
+      document.getElementById('expense-list-section').style.display = 'none'
+      document.getElementById('trip-setup-card').scrollIntoView({ behavior:'smooth', block:'start' })
+      document.getElementById('destination').focus()
+    }
+
+    function saveTrip() {
+      const dest   = document.getElementById('destination').value.trim()
+      const budget = parseFloat(document.getElementById('total-budget').value)
+      const curr   = document.getElementById('currency').value
+      if (!dest)              { shake(document.getElementById('destination'));   return }
+      if (!budget || budget <= 0) { shake(document.getElementById('total-budget')); return }
+      const trip = {
+        id: Date.now(), destination: dest, budget, currency: curr,
+        symbol: SYMBOLS[curr], expenses: [],
+        date: new Date().toLocaleDateString('en-GB')
+      }
+      state.trips.unshift(trip)
+      save()
+      document.getElementById('destination').value  = ''
+      document.getElementById('total-budget').value = ''
+      renderTrips()
+      const items = document.querySelectorAll('.trip-item')
+      if (items.length > 0) selectTrip(trip, items[0])
+      showToast(`Trip to ${dest} created! ✈️`, 'green')
+    }
+
+    function addExpense() {
+      if (!currentTrip) { showToast('Please select a trip first', 'amber'); return }
+      const name     = document.getElementById('expense-name').value.trim()
+      const amount   = parseFloat(document.getElementById('expense-amount').value)
+      const category = document.getElementById('expense-category').value
+      if (!name)              { shake(document.getElementById('expense-name'));   return }
+      if (!amount || amount <= 0) { shake(document.getElementById('expense-amount')); return }
+      const trip      = state.trips.find(t => t.id === currentTrip.id)
+      const spent     = trip.expenses.reduce((s, e) => s + e.amount, 0)
+      const remaining = trip.budget - spent
+      if (amount > remaining) {
+        showToast(`⚠️ Exceeds remaining budget of ${trip.symbol}${fmt(remaining)}`, 'amber')
+        return
+      }
+      const expense = {
+        id: Date.now(), name, amount, category,
+        date: new Date().toLocaleDateString('en-GB')
+      }
+      trip.expenses.unshift(expense)
+      currentTrip = trip
+      save()
+      document.getElementById('expense-name').value   = ''
+      document.getElementById('expense-amount').value = ''
+      document.getElementById('expense-name').focus()
+      renderExpenses()
+      updateSummary()
+    }
+
+    document.getElementById('expense-name').addEventListener('keydown',   e => e.key === 'Enter' && addExpense())
+    document.getElementById('expense-amount').addEventListener('keydown', e => e.key === 'Enter' && addExpense())
+
+    function deleteExpense(id) {
+      const trip = state.trips.find(t => t.id === currentTrip.id)
+      trip.expenses = trip.expenses.filter(e => e.id !== id)
+      currentTrip = trip
+      save()
+      renderExpenses()
+      updateSummary()
+    }
+
+    function deleteTrip(id) {
+      if (!confirm('Delete this trip and all its expenses?')) return
+      state.trips = state.trips.filter(t => t.id !== id)
+      if (currentTrip?.id === id) {
+        currentTrip = null
+        document.getElementById('summary-section').style.display      = 'none'
+        document.getElementById('expense-section').style.display      = 'none'
+        document.getElementById('expense-list-section').style.display = 'none'
+      }
+      save()
+      renderTrips()
+      showToast('Trip deleted!', 'red')
+    }
+
+    function clearAll() {
+      if (!currentTrip || currentTrip.expenses.length === 0) return
+      if (!confirm('Clear all expenses for this trip?')) return
+      const trip = state.trips.find(t => t.id === currentTrip.id)
+      trip.expenses = []
+      currentTrip = trip
+      save()
+      renderExpenses()
+      updateSummary()
+    }
+
+    function renderExpenses() {
+      const expenses = currentTrip?.expenses || []
+      const filtered = state.activeFilter === 'all'
+        ? expenses : expenses.filter(e => e.category === state.activeFilter)
+      document.getElementById('empty-message').style.display = filtered.length === 0 ? 'block' : 'none'
+      document.querySelectorAll('.expense-item').forEach(el => el.remove())
+      filtered.forEach(expense => {
+        const item = document.createElement('div')
+        item.className = 'expense-item'
+        item.innerHTML = `
+          <div class="expense-item-left">
+            <div class="expense-category-icon cat-${expense.category}">${ICONS[expense.category]}</div>
+            <div>
+              <div class="expense-name">${expense.name}</div>
+              <div class="expense-category-label">${LABELS[expense.category]} · ${expense.date}</div>
+            </div>
+          </div>
+          <div class="expense-item-right">
+            <span class="expense-amount">-${currentTrip.symbol}${fmt(expense.amount)}</span>
+            <button class="delete-btn" onclick="deleteExpense(${expense.id})">✕</button>
+          </div>
+        `
+        document.getElementById('expense-items-container').appendChild(item)
+      })
+    }
+
+    function updateSummary() {
+      if (!currentTrip) return
+      const expenses  = currentTrip.expenses || []
+      const spent     = expenses.reduce((s, e) => s + e.amount, 0)
+      const remaining = currentTrip.budget - spent
+      const pct       = Math.min((spent / currentTrip.budget) * 100, 100)
+      document.getElementById('display-spent').textContent     = currentTrip.symbol + fmt(spent)
+      document.getElementById('display-remaining').textContent = currentTrip.symbol + fmt(remaining)
+      document.getElementById('progress-bar').style.width      = pct + '%'
+      document.getElementById('progress-label').textContent    = Math.round(pct) + '% of budget used'
+      pct >= 85
+        ? document.getElementById('progress-bar').classList.add('danger')
+        : document.getElementById('progress-bar').classList.remove('danger')
+    }
+
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'))
+        this.classList.add('active')
+        state.activeFilter = this.dataset.filter
+        renderExpenses()
+      })
+    })
+
+    async function convertCurrency() {
+      const amount = parseFloat(document.getElementById('convert-amount').value)
+      const from   = document.getElementById('from-currency').value
+      const to     = document.getElementById('to-currency').value
+      if (!amount || amount <= 0) { shake(document.getElementById('convert-amount')); return }
+      if (from === to) {
+        document.getElementById('conversion-output').textContent    = `${fmt(amount)} ${from} = ${fmt(amount)} ${to}`
+        document.getElementById('rate-note').textContent            = 'Same currency'
+        document.getElementById('conversion-result').style.display = 'block'
+        return
+      }
+      try {
+        const res  = await fetch(`https://api.exchangerate-api.com/v4/latest/${from}`)
+        const data = await res.json()
+        const rate   = data.rates[to]
+        const result = amount * rate
+        document.getElementById('conversion-output').textContent    = `${fmt(amount)} ${from} = ${fmt(result)} ${to}`
+        document.getElementById('rate-note').textContent            = `1 ${from} = ${rate.toFixed(4)} ${to} · Live rate`
+        document.getElementById('conversion-result').style.display = 'block'
+      } catch {
+        showToast('Could not fetch live rates. Check connection.', 'red')
+      }
+    }
+
+    function fmt(num) {
+      return parseFloat(num).toLocaleString('en-US', { minimumFractionDigits:2, maximumFractionDigits:2 })
+    }
+
+    function shake(el) {
+      el.style.borderColor = 'var(--red)'
+      el.style.boxShadow   = '0 0 0 3px var(--red-light)'
+      setTimeout(() => { el.style.borderColor = ''; el.style.boxShadow = '' }, 1000)
+      el.focus()
+    }
+
+    function showToast(msg, type = 'green') {
+      const colors = { green:'#059669', red:'#dc2626', amber:'#d97706' }
+      const ex = document.querySelector('.toast')
+      if (ex) ex.remove()
+      const t = document.createElement('div')
+      t.className   = 'toast'
+      t.textContent = msg
+      t.style.cssText = `position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:${colors[type]};color:#fff;padding:12px 24px;border-radius:100px;font-size:0.85rem;font-weight:600;z-index:9999;animation:fadeIn 0.3s ease;box-shadow:0 4px 20px rgba(0,0,0,0.2);white-space:nowrap`
+      document.body.appendChild(t)
+      setTimeout(() => t.remove(), 3000)
+    }
+
+    load()
+  </script>
+</body>
+</html>
